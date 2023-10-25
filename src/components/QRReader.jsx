@@ -60,7 +60,6 @@ export const QRReader = ({ setQr, updateAttendance }) => {
         onResult={handleResult}
         constraints={{ facingMode: 'environment' }}
       />
-      {err.toString()}
     </div>
   );
 };

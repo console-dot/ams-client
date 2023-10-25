@@ -1541,6 +1541,18 @@ input:checked + .toggle-bg {
   height: 100vh;
 }
 
+.h-\[calc\(100vh-242\.4px-82px-60px\)\] {
+  height: calc(100vh - 242.4px - 82px - 60px);
+}
+
+.h-\[calc\(100vh-243px-82px-60px\)\] {
+  height: calc(100vh - 243px - 82px - 60px);
+}
+
+.h-\[calc\(100vh-244px-82px-60px\)\] {
+  height: calc(100vh - 244px - 82px - 60px);
+}
+
 .max-h-\[90vh\] {
   max-height: 90vh;
 }

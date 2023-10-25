@@ -24,7 +24,7 @@ export function DefaultNavbar() {
             <Avatar
               className='border rounded-full'
               alt='User settings'
-              img={getImageUrl()}
+              img={localStorage.getItem('@user') ? getImageUrl() : null}
               rounded
             />
           }

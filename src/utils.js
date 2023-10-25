@@ -43,13 +43,17 @@ export const getDate = (dateString) => {
   } ${date.getUTCDate()}, ${date.getUTCFullYear()}`;
 };
 
+const addLeadingZero = (time) => (parseInt(time) > 9 ? time : `0${time}`);
+
 export const getTime = (dateString) => {
   const date = new Date(dateString);
 
-  const hours = date.getUTCHours();
+  const hours = date.getUTCHours() + 5;
   const minutes = date.getUTCMinutes();
   const amOrPm = hours >= 12 ? 'PM' : 'AM';
-  return `${hours > 12 ? hours - 12 : hours}:${minutes} ${amOrPm}`;
+  return `${addLeadingZero(hours > 12 ? hours - 12 : hours)}:${addLeadingZero(
+    minutes
+  )} ${amOrPm}`;
 };
 
 export const getUser = () => JSON.parse(localStorage.getItem('@user'));
@@ -57,6 +61,14 @@ export const getUser = () => JSON.parse(localStorage.getItem('@user'));
 export const getImageUrl = () => {
   const ls = getUser();
   return `${BASE_URL}/file/${ls?.avatar}`;
+};
+
+export const formatDateAsApi = (inputDate) => {
+  const dateObj = new Date(inputDate);
+  const year = dateObj.getFullYear();
+  const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const day = String(dateObj.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`
 };
 
 export const getName = () => getUser()?.name;

@@ -1,22 +1,32 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { login } from '../api';
+import { useState } from 'react';
+import { Spinner } from 'flowbite-react';
 
 export const Login = () => {
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const handleLogin = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const res = await login({
-      username: formData.get('username'),
-      password: formData.get('password'),
-    });
-    if (res?.status !== 200) {
-      console.log(res);
-      return;
+    try {
+      setLoading(true);
+      e.preventDefault();
+      const formData = new FormData(e.currentTarget);
+      const res = await login({
+        username: formData.get('username'),
+        password: formData.get('password'),
+      });
+      if (res?.status !== 200) {
+        console.log(res);
+        return;
+      }
+      localStorage.setItem('@token', res?.data?.token);
+      localStorage.setItem('@user', JSON.stringify(res?.data?.employeeExist));
+      navigate('/');
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-    localStorage.setItem('@token', res?.data?.token);
-    localStorage.setItem('@user', JSON.stringify(res?.data?.employeeExist));
-    navigate('/');
   };
   return (
     <section className='bg-gray-50 dark:bg-gray-900'>
@@ -36,7 +46,7 @@ export const Login = () => {
             <form className='space-y-4 md:space-y-6' onSubmit={handleLogin}>
               <div>
                 <label
-                  for='email'
+                  htmlFor='email'
                   className='block mb-2 text-sm font-medium text-gray-900 dark:text-white'
                 >
                   Email or ID
@@ -44,6 +54,7 @@ export const Login = () => {
                 <input
                   type='text'
                   name='username'
+                  disabled={loading}
                   id='email'
                   className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
                   placeholder='email@consoledot.com or AA-AAA-0000'
@@ -52,7 +63,7 @@ export const Login = () => {
               </div>
               <div>
                 <label
-                  for='password'
+                  htmlFor='password'
                   className='block mb-2 text-sm font-medium text-gray-900 dark:text-white'
                 >
                   Password
@@ -61,6 +72,7 @@ export const Login = () => {
                   type='password'
                   name='password'
                   id='password'
+                  disabled={loading}
                   placeholder='••••••••'
                   className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
                   required
@@ -73,13 +85,13 @@ export const Login = () => {
                       id='remember'
                       aria-describedby='remember'
                       type='checkbox'
+                      name='remember'
                       className='w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-primary-600 dark:ring-offset-gray-800'
-                      required=''
                     />
                   </div>
                   <div className='ml-3 text-sm'>
                     <label
-                      for='remember'
+                      htmlFor='remember'
                       className='text-gray-500 dark:text-gray-300'
                     >
                       Remember me
@@ -94,10 +106,14 @@ export const Login = () => {
                 </Link>
               </div>
               <button
+                disabled={loading}
                 type='submit'
                 className='w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800'
               >
-                Sign in
+                {loading && (
+                  <Spinner aria-label='Filter Attendance' size='sm' />
+                )}
+                <span className={loading ? 'pl-3' : null}>Sign in</span>
               </button>
             </form>
           </div>

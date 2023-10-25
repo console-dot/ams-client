@@ -1,20 +1,30 @@
 import { Link } from 'react-router-dom';
-import { login } from '../api';
+import { forget } from '../api';
+import { Spinner } from 'flowbite-react';
+import { useState } from 'react';
 
 export const ForgetPassword = () => {
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const res = await login({
-      username: formData.get('username'),
-      password: formData.get('password'),
-    });
-    if (res?.status !== 200) {
-      console.log(res);
-      return;
+  const [loading, setLoading] = useState(false);
+  const handleForget = async (e) => {
+    try {
+      setLoading(true);
+      e.preventDefault();
+      const formData = new FormData(e.currentTarget);
+      const res = await forget({
+        email: formData.get('email'),
+      });
+      if (res?.status !== 200) {
+        console.log(res);
+        return;
+      } else {
+        console.log(res?.message);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      document.getElementById('forget-form').reset();
+      setLoading(false);
     }
-    localStorage.setItem('@token', res?.data?.token);
-    localStorage.setItem('@user', JSON.stringify(res?.data?.employeeExist));
   };
   return (
     <section className='bg-gray-50 dark:bg-gray-900'>
@@ -31,20 +41,25 @@ export const ForgetPassword = () => {
             <h1 className='text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white'>
               Reset Account Password
             </h1>
-            <form className='space-y-4 md:space-y-6' onSubmit={handleLogin}>
+            <form
+              id='forget-form'
+              className='space-y-4 md:space-y-6'
+              onSubmit={handleForget}
+            >
               <div>
                 <label
-                  for='email'
+                  htmlFor='email'
                   className='block mb-2 text-sm font-medium text-gray-900 dark:text-white'
                 >
-                  Email or ID
+                  Email
                 </label>
                 <input
-                  type='text'
-                  name='username'
+                  disabled={loading}
+                  type='email'
+                  name='email'
                   id='email'
                   className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
-                  placeholder='email@consoledot.com or AA-AAA-0000'
+                  placeholder='email@consoledot.com'
                   required
                 />
               </div>
@@ -57,10 +72,14 @@ export const ForgetPassword = () => {
                 </Link>
               </div>
               <button
+                disabled={loading}
                 type='submit'
                 className='w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800'
               >
-                Send reset link
+                {loading && (
+                  <Spinner aria-label='Filter Attendance' size='sm' />
+                )}
+                <span className={loading ? 'pl-3' : null}>Send reset link</span>
               </button>
             </form>
           </div>
