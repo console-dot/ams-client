@@ -2,17 +2,22 @@ import React, { useEffect, useState } from 'react';
 import { QrReader } from 'react-qr-reader';
 import { getId } from '../utils';
 import { markAttendance } from '../api';
+import { useToastState } from '../context';
 
 export const QRReader = ({ setQr, updateAttendance }) => {
   const [data, setData] = useState('No result');
   const [err, setErr] = useState('');
+  const { dispatch } = useToastState();
 
   const handleScan = async (employeeId, key) => {
     try {
       const res = await markAttendance(employeeId, key);
       if (res?.status === 201 || res?.status === 200) {
+        dispatch({ type: 'SUCCESS', payload: res?.message });
         await updateAttendance();
         setQr(false);
+      } else {
+        dispatch({ type: 'ERROR', payload: res?.message });
       }
     } catch (error) {
       console.error(error);
@@ -40,7 +45,7 @@ export const QRReader = ({ setQr, updateAttendance }) => {
   const handleResult = (result, error) => {
     try {
       if (result) {
-        setErr(result)
+        setErr(result);
         setData(result.text);
       }
 
