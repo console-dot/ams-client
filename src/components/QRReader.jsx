@@ -5,7 +5,7 @@ import { markAttendance } from '../api';
 import { useToastState } from '../context';
 
 export const QRReader = ({ setQr, updateAttendance }) => {
-  const [data, setData] = useState('No result');
+  const [data, setData] = useState(null);
   const [err, setErr] = useState('');
   const { dispatch } = useToastState();
 
@@ -18,6 +18,7 @@ export const QRReader = ({ setQr, updateAttendance }) => {
         setQr(false);
       } else {
         dispatch({ type: 'ERROR', payload: res?.message });
+        setQr(false);
       }
     } catch (error) {
       console.error(error);
@@ -26,15 +27,16 @@ export const QRReader = ({ setQr, updateAttendance }) => {
   };
 
   useEffect(() => {
-    const employeeId = getId();
-    const key = data;
+    if (data) {
+      const employeeId = getId();
+      const key = data;
 
-    const handleScanAndCleanup = async () => {
-      await handleScan(employeeId, key);
-    };
+      const handleScanAndCleanup = async () => {
+        await handleScan(employeeId, key);
+      };
 
-    handleScanAndCleanup();
-
+      handleScanAndCleanup();
+    }
     return () => {
       // Cleanup function to cancel any pending asynchronous tasks
       // when the component unmounts.
