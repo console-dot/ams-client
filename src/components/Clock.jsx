@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 export function Clock() {
   const [currentTime, setCurrentTime] = useState(new Date());
+  const options = { hour12: true, hour: '2-digit', minute: '2-digit' };
 
   useEffect(() => {
     // Update the current time every second
@@ -15,5 +16,5 @@ export function Clock() {
     };
   }, []);
 
-  return <>{currentTime.toLocaleTimeString()}</>;
+  return <>{currentTime.toLocaleTimeString('en-US', options)}</>;
 }
