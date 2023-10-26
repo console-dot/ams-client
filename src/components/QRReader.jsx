@@ -63,7 +63,7 @@ export const QRReader = ({ setQr, updateAttendance }) => {
     <div className='flex items-center justify-center h-screen'>
       <QrReader
         className='p-8 w-full rounded-lg'
-        scanDelay={1000}
+        scanDelay={500}
         onResult={handleResult}
         constraints={{ facingMode: 'environment' }}
       />
