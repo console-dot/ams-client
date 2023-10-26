@@ -17,8 +17,10 @@ export const QRReader = ({ setQr, updateAttendance }) => {
         await updateAttendance();
         setQr(false);
       } else {
-        dispatch({ type: 'ERROR', payload: res?.message });
-        setQr(false);
+        if (res?.message !== 'Key is invalid') {
+          dispatch({ type: 'ERROR', payload: res?.message });
+          setQr(false);
+        }
       }
     } catch (error) {
       console.error(error);
