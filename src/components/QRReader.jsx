@@ -13,7 +13,8 @@ export const QRReader = ({ setQr, updateAttendance }) => {
     try {
       const res = await markAttendance(employeeId, key);
       if (res?.status === 201 || res?.status === 200) {
-        dispatch({ type: 'SUCCESS', payload: res?.message });
+        if (res?.message !== '000')
+          dispatch({ type: 'SUCCESS', payload: res?.message });
         await updateAttendance();
         setQr(false);
       } else {
@@ -65,7 +66,7 @@ export const QRReader = ({ setQr, updateAttendance }) => {
     <div className='flex items-center justify-center h-screen'>
       <QrReader
         className='p-8 w-full rounded-lg'
-        scanDelay={1000}
+        scanDelay={100}
         onResult={handleResult}
         constraints={{ facingMode: 'environment' }}
       />
