@@ -3,6 +3,7 @@ import { QrReader } from 'react-qr-reader';
 import { getId } from '../utils';
 import { markAttendance } from '../api';
 import { useToastState } from '../context';
+import { socket } from '../App';
 
 export const QRReader = ({ setQr, updateAttendance }) => {
   const [data, setData] = useState(null);
@@ -16,6 +17,7 @@ export const QRReader = ({ setQr, updateAttendance }) => {
         if (res?.message !== '000')
           dispatch({ type: 'SUCCESS', payload: res?.message });
         await updateAttendance();
+        socket.emit('checked-in', employeeId);
         setQr(false);
       } else {
         if (res?.message !== 'Key is invalid') {
