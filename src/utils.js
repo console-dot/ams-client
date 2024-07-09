@@ -73,3 +73,4 @@ export const formatDateAsApi = (inputDate) => {
 
 export const getName = () => getUser()?.name;
 export const getEmail = () => getUser()?.email;
+export const getemployeeId = () => getUser()?.employeeId;
