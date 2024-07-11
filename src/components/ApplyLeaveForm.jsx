@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { Button, Modal, Label, TextInput, Textarea } from "flowbite-react";
+import {  Label, TextInput, Textarea } from "flowbite-react";
 import { getemployeeId, getEmail, getName } from "../utils";
-import { postLeave } from "../api";
+import { getAllLeaves, postLeave } from "../api";
 
 export const ApplyLeaveForm = ({ onSubmit, onClose }) => {
   const [fromDate, setFromDate] = useState("");
@@ -20,14 +20,25 @@ export const ApplyLeaveForm = ({ onSubmit, onClose }) => {
       status: "Pending",
     };
 
+    const obj = {
+      employeeId: getemployeeId(),
+      name: getName(),
+      email: getEmail(),
+      startDate: fromDate,
+      endDate: toDate,
+      applicationReason,
+    };
+    console.log("formData", formData);
     await onSubmit(formData);
-    await postLeave(formData);
+    await postLeave(obj);
+    await getAllLeaves();
   };
 
   return (
     <>
       <form onSubmit={handleSubmit} className="p-4">
         <h2 className="text-center text-2xl font-bold mb-4">Apply Leave</h2>
+        <hr className="my-4" />
         <p>Name: {getName()}</p>
         <p>ID: {getemployeeId()}</p>
         <hr className="my-4" />
@@ -65,13 +76,19 @@ export const ApplyLeaveForm = ({ onSubmit, onClose }) => {
           />
         </div>
         <div className="flex justify-end gap-2 mt-4">
-          <button type="button" onClick={onClose} className=" bg-red-600 text-white px-4 py-1 rounded-md hover:shadow-xl hover:scale-105 ">
+          <button
+            type="button"
+            onClick={onClose}
+            className=" bg-red-600 text-white px-4 py-1 rounded-md hover:shadow-xl hover:scale-105 "
+          >
             Close
           </button>
-          <button type="submit" className="bg-green-600 text-white px-4 py-1 rounded-md hover:shadow-xl hover:scale-105">
+          <button
+            type="submit"
+            className="bg-green-600 text-white px-4 py-1 rounded-md hover:shadow-xl hover:scale-105"
+          >
             Submit
           </button>
-          
         </div>
       </form>
     </>
