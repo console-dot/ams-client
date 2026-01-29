@@ -1,5 +1,5 @@
 import { Route, Routes } from 'react-router-dom';
-import { ForgetPassword, GetApp, Home, Login, ResetPassword } from '../pages';
+import { ApplyLeave, ForgetPassword, GetApp, Home, Login, ResetPassword } from '../pages';
 
 export const General = () => {
   return (
@@ -9,6 +9,7 @@ export const General = () => {
       <Route path='/forget-password' element={<ForgetPassword />} />
       <Route path='/reset-password' element={<ResetPassword />} />
       <Route path='/get' element={<GetApp />} />
+      <Route path='/applyleave' element={<ApplyLeave />} />
     </Routes>
   );
 };

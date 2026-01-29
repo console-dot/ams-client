@@ -1,0 +1,240 @@
+import React, { useState, useRef, useEffect } from "react";
+import { CommonLayout } from "../layouts";
+import { ApplyLeaveForm, Clock } from "../components";
+import { Button, Modal } from "flowbite-react";
+import { FaEye, FaTrash } from "react-icons/fa";
+import { getAllLeaves, deleteLeave } from "../api"; // Import deleteLeave API function
+import { getemployeeId } from "../utils";
+
+// Modal for viewing application details
+const ViewApplicationModal = ({ application, onClose }) => {
+  return (
+    <Modal show={true} onClose={onClose}>
+      <div className="p-4">
+        <h2 className="text-center text-2xl font-bold mb-4">
+          Application Details
+        </h2>
+        <hr className="my-4" />
+        <p>
+          <span className="font-semibold">Name:</span> {application.name}
+        </p>
+        <p>
+          <span className="font-semibold">ID:</span> {application.employeeId}
+        </p>
+        <p>
+          <span className="font-semibold">From:</span>{" "}
+          {new Date(application.fromDate).toLocaleDateString()}
+        </p>
+        <p>
+          <span className="font-semibold">To:</span>{" "}
+          {new Date(application.toDate).toLocaleDateString()}
+        </p>
+        <p>
+          <span className="font-semibold">Application Reason:</span>{" "}
+          {application.applicationReason}
+        </p>
+        <div className="flex justify-end mt-4">
+          <button
+            className="bg-red-600 text-white px-4 py-1 rounded-md hover:shadow-xl hover:scale-105"
+            onClick={onClose}
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </Modal>
+  );
+};
+
+export const ApplyLeave = () => {
+  const [loading, setLoading] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [viewModalOpen, setViewModalOpen] = useState(false); // State for view modal
+  const [applications, setApplications] = useState([]);
+  const [selectedApplication, setSelectedApplication] = useState(null); // State to hold selected application for viewing
+  const [employeeId, setEmployeeId] = useState(null); // State to hold employee ID
+  const modalRef = useRef(null);
+
+  const calculateDays = (fromDate, toDate) => {
+    const from = new Date(fromDate);
+    const to = new Date(toDate);
+    const diffTime = Math.abs(to - from);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // Include end date
+    return diffDays;
+  };
+
+  const truncateText = (text, maxLength) => {
+    const words = text.split(" ");
+    if (words.length > maxLength) {
+      return words.slice(0, maxLength).join(" ") + "...";
+    } else {
+      return text;
+    }
+  };
+
+  const handleFormSubmit = (formData) => {
+    const daysApplied = calculateDays(formData.fromDate, formData.toDate);
+    formData.daysApplied = daysApplied;
+    formData.status = "Pending"; // Assuming new applications are always "Pending"
+    setApplications([...applications, formData]);
+    setModalOpen(false);
+    getAllLeaves();
+  };
+
+  const onCloseModal = () => {
+    setModalOpen(false);
+    getemployeeId();
+  };
+
+  const openApplicationModal = (application) => {
+    setSelectedApplication(application);
+    setViewModalOpen(true); // Open view modal
+  };
+
+  const deleteApplication = async (leaveId) => {
+    try {
+      await deleteLeave(leaveId);
+      setApplications(applications.filter((app) => app._id !== leaveId)); // Filter out the deleted application
+    } catch (error) {
+      console.error("Error deleting leave:", error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchEmployeeId = async () => {
+      try {
+        const id = await getemployeeId();
+        setEmployeeId(id);
+      } catch (error) {
+        console.error("Error fetching employee ID:", error);
+      }
+    };
+
+    const fetchLeaves = async () => {
+      try {
+        setLoading(true);
+        const leaves = await getAllLeaves();
+        setApplications(leaves);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching leaves:", error);
+        setLoading(false);
+      }
+    };
+
+    fetchEmployeeId();
+    fetchLeaves();
+  }, []);
+
+  const filteredApplications = applications.filter(
+    (app) => app.employeeId === employeeId
+  );
+
+  return (
+    <CommonLayout>
+      <div className="flex items-center justify-between p-5 bg-gray-50">
+        <span className="font-semibold text-xl">
+          <Clock />
+        </span>
+        <Button onClick={() => setModalOpen(true)} className="btn">
+          Apply Leave
+        </Button>
+      </div>
+      <Modal show={modalOpen} onClose={onCloseModal}>
+        <div ref={modalRef}>
+          <ApplyLeaveForm onSubmit={handleFormSubmit} onClose={onCloseModal} />
+        </div>
+      </Modal>
+      <div className="mb-4 flex justify-center">
+        <span className="text-2xl font-bold">Applied Leaves</span>
+      </div>
+      <div className="mt-8 px-5 overflow-x-auto w-full">
+        <table className="min-w-full border-collapse md:table bg-white border border-gray-300">
+          <thead className="md:table-header-group">
+            <tr className="border border-grey-500 md:border-none md:table-row">
+              <th className="bg-gray-600 p-2 text-white font-bold md:border md:border-grey-500 text-left md:table-cell">
+                #
+              </th>
+              <th className="bg-gray-600 p-2 text-white font-bold md:border md:border-grey-500 text-left md:table-cell">
+                Application Reason
+              </th>
+              <th className="bg-gray-600 p-2 text-white font-bold md:border md:border-grey-500 text-left md:table-cell">
+                From
+              </th>
+              <th className="bg-gray-600 p-2 text-white font-bold md:border md:border-grey-500 text-left md:table-cell">
+                To
+              </th>
+              <th className="bg-gray-600 p-2 text-white font-bold md:border md:border-grey-500 text-left md:table-cell">
+                Days
+              </th>
+              <th className="bg-gray-600 p-2 text-white font-bold md:border md:border-grey-500 text-left md:table-cell">
+                Status
+              </th>
+              <th className="bg-gray-600 p-2 text-white font-bold md:border md:border-grey-500 text-left md:table-cell">
+                <div className="flex justify-center">Actions</div>
+              </th>
+            </tr>
+          </thead>
+          <tbody className="md:table-row-group">
+            {filteredApplications.map((app, index) => (
+              <tr
+                key={index}
+                className="bg-white border border-grey-500 md:border-none md:table-row"
+              >
+                <td className="p-2 md:border md:border-grey-500 text-left md:table-cell">
+                  {index + 1}
+                </td>
+                <td className="p-2 md:border md:border-grey-500 text-left md:table-cell">
+                  {truncateText(app.applicationReason, 5)}
+                </td>
+                <td className="p-2 md:border md:border-grey-500 text-left md:table-cell">
+                  {new Date(app.fromDate).toLocaleDateString()}
+                </td>
+                <td className="p-2 md:border md:border-grey-500 text-left md:table-cell">
+                  {new Date(app.toDate).toLocaleDateString()}
+                </td>
+                <td className="p-2 md:border md:border-grey-500 text-left md:table-cell">
+                  {calculateDays(app.fromDate, app.toDate)}
+                </td>
+                <td className="p-2 md:border md:border-grey-500 text-left md:table-cell">
+                  <span
+                    className={`px-2 py-1 font-semibold leading-tight ${
+                      app.status === "Pending"
+                        ? "text-yellow-700 bg-yellow-100"
+                        : app.status === "Approved"
+                        ? "text-green-700 bg-green-100"
+                        : "text-red-700 bg-red-100"
+                    } rounded-sm`}
+                  >
+                    {app.status}
+                  </span>
+                </td>
+                <td className="p-2 md:border md:border-grey-500 text-left md:table-cell">
+                  <div className="flex justify-center items-center gap-2">
+                    <div className="">
+                      <button onClick={() => openApplicationModal(app)}>
+                        <FaEye className="text-cyan-700 hover:scale-105 text-xl" />
+                      </button>
+                    </div>
+                    <div>
+                      <button onClick={() => deleteApplication(app._id)}>
+                        <FaTrash className="text-red-600 hover:scale-105 text-lg" />
+                      </button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {/* View Application Modal */}
+      {selectedApplication && viewModalOpen && (
+        <ViewApplicationModal
+          application={selectedApplication}
+          onClose={() => setViewModalOpen(false)}
+        />
+      )}
+    </CommonLayout>
+  );
+};
